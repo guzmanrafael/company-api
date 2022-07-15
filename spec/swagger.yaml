@@ -1,0 +1,253 @@
+openapi: 3.0.0
+info:
+  description: Company API provides functionality to create and update a company type resource
+  version: "1.0.0"
+  title: Company
+  contact:
+    email: rafael.guzman1609@gmail.com
+tags:
+  - name: Company
+
+paths:
+  /company:
+    post:
+      tags:
+        - Company
+      summary: Creates a new company.
+      parameters:
+        - $ref: "#/components/parameters/fingerprintType"
+        - $ref: "#/components/parameters/fingerprint"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewCompanyRequest"
+      responses:
+        "200":
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompanyWrapperResponse"
+        "400":
+          description: Invalid Request. Missing or Invalid Parameters.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmptyDataResponse"
+        "401":
+          description: Unauthorized. Authorization credentials are missing or are invalid.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmptyDataResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmptyDataResponse"
+    patch:
+      tags:
+        - Company
+      summary: Update company.
+      parameters:
+        - $ref: "#/components/parameters/fingerprintType"
+        - $ref: "#/components/parameters/fingerprint"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCompanyRequest"
+      responses:
+        "200":
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompanyWrapperResponse"
+        "400":
+          description: Invalid Request. Missing or Invalid Parameters.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmptyDataResponse"
+        "401":
+          description: Unauthorized. Authorization credentials are missing or are invalid.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmptyDataResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmptyDataResponse"
+  /company/{companyId}:
+    get:
+      tags:
+        - Company
+      summary: Obtains a specific company.
+      parameters:
+        - $ref: "#/components/parameters/fingerprintType"
+        - $ref: "#/components/parameters/fingerprint"
+        - $ref: "#/components/parameters/companyId"
+      responses:
+        "200":
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompanyWrapperResponse"
+        "400":
+          description: Invalid Request. Missing or Invalid Parameters.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmptyDataResponse"
+        "401":
+          description: Unauthorized. Authorization credentials are missing or are invalid.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmptyDataResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmptyDataResponse"
+components:
+  parameters:
+    fingerprintType:
+      in: header
+      name: x-fingerprint-type
+      schema:
+        type: string
+      required: false
+      description: Type of digital fingerprint.
+    fingerprint:
+      in: header
+      name: x-fingerprint
+      schema:
+        type: string
+      required: false
+      description: Value of the digital fingerprint.
+    companyId:
+      in: path
+      name: companyId
+      schema:
+        type: string
+      required: true
+      description: Company id.
+      example: VETM900113MW9
+  schemas:
+    UpdateCompanyRequest:
+      type: object
+      properties:
+        taxId:
+          type: string
+          description: Company tax id
+          example: VETM900113MW9
+        legalName:
+          type: string
+          description: Company legal name.
+          example: Contoso SA de CV
+        amount:
+          type: number
+          example: 50000.5
+          description: The numerical amount of money.
+        age:
+          type: number
+          description: Age of the company, in years.
+          example: 5
+    Company:
+      type: object
+      properties:
+        id:
+          description: Unique company tax id identifier .
+          type: string
+          example: VETM900113MW9
+        taxId:
+          type: string
+          description: Company tax id
+          example: VETM900113MW9
+        legalName:
+          type: string
+          description: Company legal name.
+          example: Contoso SA de CV
+        amount:
+          type: number
+          example: 50000.5
+          description: The numerical amount of money.
+        age:
+          type: number
+          description: Age of the company, in years.
+          example: 5
+    CompanyWrapperResponse:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/Company"
+        notification:
+          $ref: "#/components/schemas/Notification"
+    NewCompanyRequest:
+      type: object
+      required:
+        - taxId
+      properties:
+        taxId:
+          type: string
+          description: Company tax id
+          example: VETM900113MW9
+        legalName:
+          type: string
+          description: Company legal name.
+          example: Contoso SA de CV
+        amount:
+          type: number
+          example: 50000.5
+          description: The numerical amount of money.
+        age:
+          type: number
+          description: Age of the company, in years.
+          example: 5
+    EmptyDataResponse:
+      type: object
+      properties:
+        data:
+          type: string
+          example: "null"
+        notification:
+          $ref: "#/components/schemas/Notification"
+
+    Notification:
+      type: object
+      properties:
+        level:
+          type: string
+          description: |
+            level:
+              * INFO - Informative notification.
+              * WARNING - Warning notification, something may have happened with the request.
+              * ERROR - Error notification, some error may have occurred with the request.
+          example: WARNING
+          enum:
+            - INFO
+            - WARNING
+            - ERROR
+        code:
+          type: string
+          description: Code to identify the notification and classify according to the first character (E) Error,(W) Warning,(I) Info.
+          example: WBC-102-004
+        message:
+          type: string
+          description: Human-friendly error or notification message.
+          example: Something happened while processing the request.
+        timestamp:
+          type: string
+          description: >
+            [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) Date and time when the notification happened.
+          format: date-time
+          example: "2021-08-29T09:12:33.001Z"

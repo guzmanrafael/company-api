@@ -1,0 +1,7 @@
+.idea/**
+node_modules/
+/node_modules/
+.history
+.serverless
+.build
+package-lock.json

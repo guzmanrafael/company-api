@@ -1,0 +1,89 @@
+service: ion-company-api
+
+package:
+  individually: true
+  include:
+    - src/environment/.env.local
+    - src/environment/.env.dev
+    - src/environment/.env.qa
+    - src/environment/.env.prod
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  lambdaHashingVersion: 20201221
+  stage: ${opt:stage, 'dev'}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - lambda:InvokeFunction
+          Resource: '*'
+        - Effect: Allow
+          Action:
+            - ssm:*
+          Resource: '*'
+  environment:
+    STAGE: ${self:provider.stage}
+    PROJECT: ${self:service}
+custom:
+  api-gw-dev-events:
+    local:
+      SpecificCompanyHandler:
+        - http:
+            method: get
+            path: /company/{companyId}
+            cors: true
+            request:
+              parameters:
+                companyId: true
+      CompanyHandler:
+        - http:
+            method: post
+            path: /company
+      UpdateCompanyHandler:
+        - http:
+            method: patch
+            path: /company/{companyId}
+            cors: true
+            request:
+              parameters:
+                companyId: true
+    dev:
+      SpecificCompanyHandler:
+      CompanyHandler:
+      UpdateCompanyHandler:
+    prod:
+      SpecificCompanyHandler:
+      CompanyHandler:
+      UpdateCompanyHandler:
+  serverless-offline:
+    httpPort: 5000
+  stages:
+    - dev
+    - qa
+    - prod
+
+functions:
+  UpdateCompanyHandler:
+    handler: src/functions/UpdateCompanyHandler.UpdateCompanyHandler
+    name: UpdateCompanyHandler
+    timeout: 15
+    events: ${self:custom.api-gw-dev-events.${self:provider.stage}.UpdateCompanyHandler}
+  SpecificCompanyHandler:
+    handler: src/functions/SpecificCompanyHandler.SpecificCompanyHandler
+    name: SpecificCompanyHandler
+    timeout: 15
+    events: ${self:custom.api-gw-dev-events.${self:provider.stage}.SpecificCompanyHandler}
+  CompanyHandler:
+    handler: src/functions/CompanyHandler.CompanyHandler
+    name: CompanyHandler
+    timeout: 15
+    events: ${self:custom.api-gw-dev-events.${self:provider.stage}.CompanyHandler}
+resources:
+  Resources: null
+plugins:
+  - serverless-plugin-typescript
+  - serverless-offline
+  - serverless-plugin-optimize
